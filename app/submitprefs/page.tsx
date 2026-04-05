@@ -47,7 +47,7 @@ export default function SubmitPage() {
         <main
             className="relative min-h-screen flex items-center justify-center px-6 bg-center bg-cover"
             style={{
-                backgroundImage: "url('/images/background.jpg')",
+                backgroundImage: "url('/Images/background.jpg')",
             }}
         >
             <div className="absolute inset-0 bg-white/80" />

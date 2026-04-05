@@ -12,10 +12,10 @@ type Option = {
 }
 
 const options: Option[] = [
-    { label: 'Hot Drinks', value: 'hot_drinks', image: '/images/hotdrinks.jpg' },
-    { label: 'Sweets', value: 'sweets', image: '/images/sweets.jpg' },
-    { label: 'Spices & Sauces', value: 'spices', image: '/images/spices.jpg' },
-    { label: 'Fresh Fruits', value: 'fruits', image: '/images/fruits.jpg' },
+    { label: 'Hot Drinks', value: 'hot_drinks', image: '/Images/hotdrinks.jpg' },
+    { label: 'Sweets', value: 'sweets', image: '/Images/sweets.jpg' },
+    { label: 'Spices & Sauces', value: 'spices', image: '/Images/spices.jpg' },
+    { label: 'Fresh Fruits', value: 'fruits', image: '/Images/fruits.jpg' },
 ]
 
 export default function ComfortFoods() {

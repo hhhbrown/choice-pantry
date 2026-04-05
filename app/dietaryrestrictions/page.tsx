@@ -87,7 +87,7 @@ export default function DietaryRestrictions() {
         <div className="relative min-h-screen">
             <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('/images/background3.jpg')" }}
+                style={{ backgroundImage: "url('/Images/background3.jpg')" }}
             />
 
             <div className="absolute inset-0 bg-white/70" />

@@ -14,14 +14,14 @@ type Option = {
 }
 
 const options: Option[] = [
-    { label: 'Flatbread', value: 'flatbread', image: '/images/flatbread.jpg' },
-    { label: 'Noodles', value: 'noodles', image: '/images/noodles.jpg' },
-    { label: 'Stew', value: 'stew', image: '/images/stew.jpg' },
-    { label: 'Rice', value: 'rice', image: '/images/rice.jpg' },
-    { label: 'Beans', value: 'beans', image: '/images/beans.jpg' },
-    { label: 'Lentils', value: 'lentils', image: '/images/lentils.jpg' },
-    { label: 'Root Vegetables', value: 'root_vegetables', image: '/images/rootveg.jpg' },
-    { label: 'Dairy', value: 'dairy', image: '/images/dairy.jpg' },
+    { label: 'Flatbread', value: 'flatbread', image: '/Images/flatbread.jpg' },
+    { label: 'Noodles', value: 'noodles', image: '/Images/noodles.jpg' },
+    { label: 'Stew', value: 'stew', image: '/Images/stew.jpg' },
+    { label: 'Rice', value: 'rice', image: '/Images/rice.jpg' },
+    { label: 'Beans', value: 'beans', image: '/Images/beans.jpg' },
+    { label: 'Lentils', value: 'lentils', image: '/Images/lentils.jpg' },
+    { label: 'Root Vegetables', value: 'root_vegetables', image: '/Images/rootveg.jpg' },
+    { label: 'Dairy', value: 'dairy', image: '/Images/dairy.jpg' },
 ]
 
 export default function CuisinePreferences() {
