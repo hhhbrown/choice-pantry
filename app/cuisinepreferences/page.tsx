@@ -5,16 +5,56 @@ import { useState } from 'react'
 type Option = {
   label: string
   value: string
+  baseClass: string
+  selectedClass: string
 }
 
 const options: Option[] = [
-  { label: 'Rice dishes', value: 'rice' },
-  { label: 'Flatbreads', value: 'bread' },
-  { label: 'Noodles', value: 'noodles' },
-  { label: 'Stews', value: 'stews' },
+  {
+    label: 'North American',
+    value: 'n-american',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'South American',
+    value: 's-american',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'European',
+    value: 'european',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'Asian',
+    value: 'asian',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'African',
+    value: 'african',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'Oceania',
+    value: 'oceania',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
+  {
+    label: 'Indigenous',
+    value: 'indigenous',
+    baseClass: 'border-black text-black hover:bg-white',
+    selectedClass: 'border-black bg-white text-black',
+  },
 ]
 
-export default function cuisinepreferences() {
+export default function CuisinePreferences() {
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [submittedValue, setSubmittedValue] = useState<string | null>(null)
@@ -30,8 +70,7 @@ export default function cuisinepreferences() {
   const handleAddCustom = () => {
     if (!customInput.trim()) return
 
-    setSubmittedValue(customInput)
-    console.log('Custom food:', customInput)
+    setSubmittedValue(customInput.trim())
     setCustomInput('')
   }
 
@@ -40,21 +79,20 @@ export default function cuisinepreferences() {
       selected,
       customFood: submittedValue,
     })
-    // go to next page later
   }
 
   return (
     <main className="min-h-screen bg-zinc-50 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm border border-zinc-200">
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">
-          What foods would you like to eat?
+      <div className="w-full max-w-6xl rounded-3xl bg-white p-8 shadow-sm border border-zinc-200">
+        <h1 className="text-3xl font-bold text-zinc-900 mb-2">
+          What types of foods interest you?
         </h1>
 
-        <p className="text-zinc-600 mb-6">
+        <p className="text-zinc-600 mb-8">
           Select all that apply.
         </p>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {options.map((option) => {
             const isSelected = selected.includes(option.value)
 
@@ -63,46 +101,52 @@ export default function cuisinepreferences() {
                 key={option.value}
                 type="button"
                 onClick={() => toggleOption(option.value)}
-                className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                  isSelected
-                    ? 'border-black bg-black text-white'
-                    : 'border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-100'
+                className={`min-h-36 rounded-2xl border-2 p-5 text-left transition ${
+                  isSelected ? option.selectedClass : option.baseClass
                 }`}
               >
-                {option.label}
+                <div className="flex h-full flex-col justify-between">
+                  <span className="text-xl font-semibold leading-snug">
+                    {option.label}
+                  </span>
+                  <span className="mt-4 text-sm opacity-80">
+                    {isSelected ? 'Selected' : 'Tap to choose'}
+                  </span>
+                </div>
               </button>
             )
           })}
 
-          {/* Other / custom option */}
-          <div className="rounded-xl border border-zinc-300 bg-white p-4">
+          <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border-2 border-black bg-white p-5">
             <label
               htmlFor="custom-food"
-              className="block text-sm font-medium text-zinc-800 mb-2"
+              className="block text-lg font-semibold text-black mb-3"
             >
-              Other
+              Something else
             </label>
 
-            <input
-              id="custom-food"
-              type="text"
-              placeholder="e.g. Injera, roti, kimchi..."
-              value={customInput}
-              onChange={(e) => setCustomInput(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-black"
-            />
+            <div className="flex flex-col md:flex-row gap-3">
+              <input
+                id="custom-food"
+                type="text"
+                placeholder="e.g. Injera, roti, kimchi..."
+                value={customInput}
+                onChange={(e) => setCustomInput(e.target.value)}
+                className="flex-1 rounded-xl border border-black bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:black-400"
+              />
 
-            <button
-              type="button"
-              onClick={handleAddCustom}
-              className="mt-3 w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-medium hover:bg-zinc-800 transition"
-            >
-              Add custom food
-            </button>
+              <button
+                type="button"
+                onClick={handleAddCustom}
+                className="rounded-xl bg-white px-6 py-3 text-white font-medium hover:bg-white"
+              >
+                Add
+              </button>
+            </div>
 
             {submittedValue && (
-              <p className="mt-3 text-sm text-zinc-600">
-                Added: <span className="font-medium text-zinc-900">{submittedValue}</span>
+              <p className="mt-3 text-sm text-black">
+                Added: <span className="font-semibold">{submittedValue}</span>
               </p>
             )}
           </div>
@@ -111,7 +155,7 @@ export default function cuisinepreferences() {
         <button
           type="button"
           onClick={handleContinue}
-          className="mt-6 w-full rounded-xl bg-zinc-900 px-4 py-3 text-white font-medium hover:bg-zinc-800 transition"
+          className="mt-8 w-full rounded-2xl bg-zinc-900 px-6 py-4 text-white text-lg font-medium hover:bg-zinc-800 transition"
         >
           Continue
         </button>
