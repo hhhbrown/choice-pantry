@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+**Seat at the Table*
 
-## Getting Started
+*Overview*
 
-First, run the development server:
+Seat at the Table is a web-based tool designed to support the wellbeing of women living in shelters. Instead of treating food as one-size-fits-all, the app allows residents to express their preferences and needs so that donations and meal planning better reflect who they are.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*Problem*
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Limited food options offered in shelters can contribute to a loss of identity and reduce overall wellbeing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Solution
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Seat at the Table provides a simple, low-friction interface where users can:
 
-## Learn More
+Select preferred food categories and ingredients
+Indicate dietary restrictions
+Add custom needs or preferences
 
-To learn more about Next.js, take a look at the following resources:
+The app provides insights on which foods make users feel comforted. It allows staff to gather data in real time so they can make informed decisions when sourcing donations, reflecting needs of current residents.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+We want residents to make autonomous, dignified decisions surrounding which foods make them feel comforted.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+*Key Features*
+- Tap-based selection interface, no account required
+- Custom input for dietary needs
+- Simple, accessible design for shared devices
+- Fast
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+*Tech Stack*
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Firebase (for backend integration)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built as part of a hackathon project focused on technology for women’s wellbeing in shelters.
