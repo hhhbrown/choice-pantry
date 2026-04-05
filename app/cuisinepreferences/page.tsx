@@ -1,77 +1,34 @@
 'use client'
 
 import { useState } from 'react'
+import { db } from '@/app/firebase'
+import { doc, increment, setDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { getFoodInsights } from '../foodmappings'
+
 
 type Option = {
   label: string
   value: string
-  baseClass: string
   image: string
-  selectedClass: string
 }
 
 const options: Option[] = [
-  {
-    label: 'Flatbread',
-    value: 'flatbread',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/flatbread.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Noodles',
-    value: 'noodles',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/noodles.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Stew',
-    value: 'stew',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/stew.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Rice',
-    value: 'rice',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/rice.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Beans',
-    value: 'beans',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/beans.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Lentils',
-    value: 'lentils',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/lentils.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Root Vegetables',
-    value: 'root vegetables',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/rootveg.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  { label: 'Dairy',
-    value: 'dairy',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/dairy.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
+  { label: 'Flatbread', value: 'flatbread', image: '/images/flatbread.jpg' },
+  { label: 'Noodles', value: 'noodles', image: '/images/noodles.jpg' },
+  { label: 'Stew', value: 'stew', image: '/images/stew.jpg' },
+  { label: 'Rice', value: 'rice', image: '/images/rice.jpg' },
+  { label: 'Beans', value: 'beans', image: '/images/beans.jpg' },
+  { label: 'Lentils', value: 'lentils', image: '/images/lentils.jpg' },
+  { label: 'Root Vegetables', value: 'root_vegetables', image: '/images/rootveg.jpg' },
+  { label: 'Dairy', value: 'dairy', image: '/images/dairy.jpg' },
 ]
 
 export default function CuisinePreferences() {
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [submittedValue, setSubmittedValue] = useState<string | null>(null)
+  const router = useRouter()
 
   const toggleOption = (value: string) => {
     setSelected((prev) =>
@@ -83,16 +40,67 @@ export default function CuisinePreferences() {
 
   const handleAddCustom = () => {
     if (!customInput.trim()) return
-
     setSubmittedValue(customInput.trim())
     setCustomInput('')
   }
 
-  const handleContinue = () => {
-    console.log({
-      selected,
-      customFood: submittedValue,
-    })
+  const handleContinue = async () => {
+    try {
+      const insights = getFoodInsights(selected)
+
+      console.log('Selected:', selected)
+      console.log('Matched Patterns:', insights.matchedPatterns)
+      console.log('Suggestions:', insights.suggestions)
+
+      // COUNT PATTERNS
+      for (const pattern of insights.matchedPatterns) {
+        const id = pattern.label.toLowerCase().replace(/\s+/g, '_')
+
+        const ref = doc(db, 'patternCounts', id)
+
+        await setDoc(
+          ref,
+          {
+            label: pattern.label,
+            count: increment(1),
+          },
+          { merge: true }
+        )
+      }
+
+      // COUNT SUGGESTIONS
+      for (const suggestion of insights.suggestions) {
+        const ref = doc(db, 'suggestionCounts', suggestion)
+
+        await setDoc(
+          ref,
+          { count: increment(1) },
+          { merge: true }
+        )
+      }
+
+      // CUSTOM INPUT
+      if (submittedValue) {
+        const ref = doc(
+          db,
+          'requests',
+          submittedValue.toLowerCase()
+        )
+
+        await setDoc(
+          ref,
+          {
+            name: submittedValue,
+            count: increment(1),
+          },
+          { merge: true }
+        )
+      }
+
+      router.push('/comfortfoods')
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
   return (
@@ -103,83 +111,78 @@ export default function CuisinePreferences() {
         </h1>
 
         <p className="text-zinc-600 mb-8">
-          Select 1-2.
+          Select 1–2.
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-  {options.map((option) => {
-    const isSelected = selected.includes(option.value)
+          {options.map((option) => {
+            const isSelected = selected.includes(option.value)
 
-    return (
-        <button
-        key={option.value}
-        type="button"
-        onClick={() => toggleOption(option.value)}
-        className={`group relative min-h-36 rounded-2xl overflow-hidden transition ${
-          isSelected
-            ? 'ring-2 ring-white/80'
-            : 'ring-1 ring-black/10 hover:ring-black/20'
-        }`}
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-90"
-          style={{ backgroundImage: `url(${option.image})` }}
-        />
-      
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-black/5" />
-      
-        <div className="relative h-full flex flex-col justify-between p-5 text-black">
-          <span className="text-lg font-semibold leading-snug">
-            {option.label}
-          </span>
-      
-          <span className="mt-4 text-sm opacity-80">
-            {isSelected ? 'Selected' : 'Tap to choose'}
-          </span>
-        </div>
-      </button>
-    )
-  })}
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => toggleOption(option.value)}
+                className={`group relative min-h-36 rounded-2xl overflow-hidden transition ${
+                  isSelected
+                    ? 'ring-2 ring-white/80'
+                    : 'ring-1 ring-black/10 hover:ring-black/20'
+                }`}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-90"
+                  style={{ backgroundImage: `url(${option.image})` }}
+                />
 
-          <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border-2 border-white bg-white p-5">
-            <label
-              htmlFor="custom-food"
-              className="block text-lg font-semibold text-black mb-3"
-            >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-black/5" />
+
+                <div className="relative h-full flex flex-col justify-between p-5 text-black">
+                  <span className="text-lg font-semibold">
+                    {option.label}
+                  </span>
+
+                  <span className="mt-4 text-sm opacity-80">
+                    {isSelected ? 'Selected' : 'Tap to choose'}
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+
+          {/* OTHER INPUT */}
+          <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border bg-white p-5">
+            <label className="block text-lg font-semibold mb-3">
               Other:
             </label>
 
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex gap-3">
               <input
-                id="custom-food"
                 type="text"
-                placeholder="e.g. Fruits, leafy greens..."
+                placeholder="e.g. fruits, leafy greens..."
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                className="flex-1 rounded-xl border border-black bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:black-400"
+                className="flex-1 rounded-xl border px-4 py-3"
               />
 
               <button
-                type="button"
                 onClick={handleAddCustom}
-                className="rounded-xl bg-white px-6 py-3 text-white font-medium hover:bg-white"
+                className="rounded-xl bg-black px-6 py-3 text-white"
               >
                 Add
               </button>
             </div>
 
             {submittedValue && (
-              <p className="mt-3 text-sm text-black">
-                Added: <span className="font-semibold">{submittedValue}</span>
+              <p className="mt-3 text-sm">
+                Added: <strong>{submittedValue}</strong>
               </p>
             )}
           </div>
         </div>
 
         <button
-          type="button"
           onClick={handleContinue}
-          className="mt-8 w-full rounded-2xl bg-zinc-900 px-6 py-4 text-white text-lg font-medium hover:bg-zinc-800 transition"
+          className="mt-8 w-full rounded-2xl bg-black px-6 py-4 text-white"
         >
           Continue
         </button>

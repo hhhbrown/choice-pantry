@@ -1,50 +1,28 @@
 'use client'
 
 import { useState } from 'react'
+import { db } from '@/app/firebase'
+import { doc, setDoc, increment } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
 
 type Option = {
   label: string
   value: string
-  baseClass: string
   image: string
-  selectedClass: string
 }
 
 const options: Option[] = [
-  {
-    label: 'Hot Drinks',
-    value: 'hot-drinks',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/hotdrinks.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Sweets',
-    value: 'sweets',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/sweets.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Spices & Sauces',
-    value: 'spices',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/spices.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
-  {
-    label: 'Fresh Fruits',
-    value: 'fruits',
-    baseClass: 'border-black text-black hover:bg-white',
-    image: '/images/fruits.jpg',
-    selectedClass: 'border-black bg-white text-black',
-  },
+  { label: 'Hot Drinks', value: 'hot_drinks', image: '/images/hotdrinks.jpg' },
+  { label: 'Sweets', value: 'sweets', image: '/images/sweets.jpg' },
+  { label: 'Spices & Sauces', value: 'spices', image: '/images/spices.jpg' },
+  { label: 'Fresh Fruits', value: 'fruits', image: '/images/fruits.jpg' },
 ]
 
-export default function CuisinePreferences() {
+export default function ComfortFoods() {
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [submittedValue, setSubmittedValue] = useState<string | null>(null)
+  const router = useRouter()
 
   const toggleOption = (value: string) => {
     setSelected((prev) =>
@@ -56,16 +34,45 @@ export default function CuisinePreferences() {
 
   const handleAddCustom = () => {
     if (!customInput.trim()) return
-
     setSubmittedValue(customInput.trim())
     setCustomInput('')
   }
 
-  const handleContinue = () => {
-    console.log({
-      selected,
-      customFood: submittedValue,
-    })
+  const handleContinue = async () => {
+    try {
+      // 🔥 1. COUNT SELECTED OPTIONS
+      for (const item of selected) {
+        const ref = doc(db, 'comfortFoodCounts', item)
+
+        await setDoc(
+          ref,
+          { count: increment(1) },
+          { merge: true }
+        )
+      }
+
+      // 🔥 2. HANDLE CUSTOM INPUT
+      if (submittedValue) {
+        const ref = doc(
+          db,
+          'requests',
+          submittedValue.toLowerCase()
+        )
+
+        await setDoc(
+          ref,
+          {
+            name: submittedValue,
+            count: increment(1),
+          },
+          { merge: true }
+        )
+      }
+      router.push('/dietaryrestrictions')
+
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
   return (
@@ -80,79 +87,74 @@ export default function CuisinePreferences() {
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-  {options.map((option) => {
-    const isSelected = selected.includes(option.value)
+          {options.map((option) => {
+            const isSelected = selected.includes(option.value)
 
-    return (
-        <button
-        key={option.value}
-        type="button"
-        onClick={() => toggleOption(option.value)}
-        className={`group relative min-h-36 rounded-2xl overflow-hidden transition ${
-          isSelected
-            ? 'ring-2 ring-white/80'
-            : 'ring-1 ring-black/10 hover:ring-black/20'
-        }`}
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-90"
-          style={{ backgroundImage: `url(${option.image})` }}
-        />
-      
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-black/5" />
-      
-        <div className="relative h-full flex flex-col justify-between p-5 text-black">
-          <span className="text-lg font-semibold leading-snug">
-            {option.label}
-          </span>
-      
-          <span className="mt-4 text-sm opacity-80">
-            {isSelected ? 'Selected' : 'Tap to choose'}
-          </span>
-        </div>
-      </button>
-    )
-  })}
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => toggleOption(option.value)}
+                className={`group relative min-h-36 rounded-2xl overflow-hidden transition ${
+                  isSelected
+                    ? 'ring-2 ring-white/80'
+                    : 'ring-1 ring-black/10 hover:ring-black/20'
+                }`}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-90"
+                  style={{ backgroundImage: `url(${option.image})` }}
+                />
 
-          <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border-2 border-white bg-white p-5">
-            <label
-              htmlFor="custom-food"
-              className="block text-lg font-semibold text-black mb-3"
-            >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-black/5" />
+
+                <div className="relative h-full flex flex-col justify-between p-5 text-black">
+                  <span className="text-lg font-semibold">
+                    {option.label}
+                  </span>
+
+                  <span className="mt-4 text-sm opacity-80">
+                    {isSelected ? 'Selected' : 'Tap to choose'}
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+
+          {/* OTHER INPUT */}
+          <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border bg-white p-5">
+            <label className="block text-lg font-semibold mb-3">
               Other:
             </label>
 
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex gap-3">
               <input
-                id="custom-food"
                 type="text"
                 placeholder="e.g. snacks, cooking oil..."
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                className="flex-1 rounded-xl border border-black bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:black-400"
+                className="flex-1 rounded-xl border px-4 py-3"
               />
 
               <button
-                type="button"
                 onClick={handleAddCustom}
-                className="rounded-xl bg-white px-6 py-3 text-white font-medium hover:bg-white"
+                className="rounded-xl bg-black px-6 py-3 text-white"
               >
                 Add
               </button>
             </div>
 
             {submittedValue && (
-              <p className="mt-3 text-sm text-black">
-                Added: <span className="font-semibold">{submittedValue}</span>
+              <p className="mt-3 text-sm">
+                Added: <strong>{submittedValue}</strong>
               </p>
             )}
           </div>
         </div>
 
         <button
-          type="button"
           onClick={handleContinue}
-          className="mt-8 w-full rounded-2xl bg-zinc-900 px-6 py-4 text-white text-lg font-medium hover:bg-zinc-800 transition"
+          className="mt-8 w-full rounded-2xl bg-black px-6 py-4 text-white"
         >
           Continue
         </button>
