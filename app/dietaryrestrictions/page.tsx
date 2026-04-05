@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { db } from '@/app/firebase'
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
 
 type Option = {
   label: string
@@ -11,14 +14,18 @@ const options: Option[] = [
   { label: 'Vegan', value: 'vegan' },
   { label: 'Vegetarian', value: 'vegetarian' },
   { label: 'Halal', value: 'halal' },
-  { label: 'No Pork', value: 'no pork' },
-  { label: 'Gluten Free', value: 'gf' },
+  { label: 'No pork', value: 'no_pork' },
+  { label: 'Gluten free', value: 'gf' },
+  { label: 'Dairy free', value: 'dairy_free' },
+  { label: 'Nut free', value: 'nut_free' },
 ]
 
-export default function dietaryrestrictions() {
+export default function DietaryRestrictions() {
   const [selected, setSelected] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [submittedValue, setSubmittedValue] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const toggleOption = (value: string) => {
     setSelected((prev) =>
@@ -31,17 +38,49 @@ export default function dietaryrestrictions() {
   const handleAddCustom = () => {
     if (!customInput.trim()) return
 
-    setSubmittedValue(customInput)
-    console.log('Custom food:', customInput)
+    setSubmittedValue(customInput.trim())
     setCustomInput('')
   }
 
-  const handleContinue = () => {
-    console.log({
-      selected,
-      customFood: submittedValue,
-    })
-    // go to next page later
+  const handleContinue = async () => {
+    setLoading(true)
+
+    try {
+      const updates = selected.map((value) => {
+        const ref = doc(db, 'restrictions', value)
+        return updateDoc(ref, {
+          count: increment(1),
+        })
+      })
+
+      await Promise.all(updates)
+
+      if (submittedValue) {
+        const customRef = doc(
+          db,
+          'requests',
+          submittedValue.toLowerCase()
+        )
+
+        await setDoc(
+          customRef,
+          {
+            name: submittedValue,
+            count: increment(1),
+          },
+          { merge: true }
+        )
+      }
+
+      console.log('Data successfully updated!')
+
+      router.push('/submitprefs')
+
+    } catch (error) {
+      console.error('Error updating data:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -75,7 +114,7 @@ export default function dietaryrestrictions() {
             )
           })}
 
-          {/* Other / custom option */}
+          {/* Custom input */}
           <div className="rounded-xl border border-zinc-300 bg-white p-4">
             <label
               htmlFor="custom-food"
@@ -98,12 +137,15 @@ export default function dietaryrestrictions() {
               onClick={handleAddCustom}
               className="mt-3 w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-medium hover:bg-zinc-800 transition"
             >
-              Add custom food
+              Add
             </button>
 
             {submittedValue && (
               <p className="mt-3 text-sm text-zinc-600">
-                Added: <span className="font-medium text-zinc-900">{submittedValue}</span>
+                Added:{' '}
+                <span className="font-medium text-zinc-900">
+                  {submittedValue}
+                </span>
               </p>
             )}
           </div>
@@ -112,9 +154,10 @@ export default function dietaryrestrictions() {
         <button
           type="button"
           onClick={handleContinue}
-          className="mt-6 w-full rounded-xl bg-zinc-900 px-4 py-3 text-white font-medium hover:bg-zinc-800 transition"
+          disabled={loading}
+          className="mt-6 w-full rounded-xl bg-zinc-900 px-4 py-3 text-white font-medium hover:bg-zinc-800 transition disabled:opacity-50"
         >
-          Continue
+          {loading ? 'Saving...' : 'Continue'}
         </button>
       </div>
     </main>
