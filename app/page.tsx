@@ -21,14 +21,14 @@ export default function HomePage() {
 
                 <div className="mt-8 flex flex-col gap-4">
                     <Link
-                        href="/resident"
+                        href="/Resident"
                         className="px-6 py-4 rounded-xl bg-black text-white"
                     >
                         I am a resident
                     </Link>
 
                     <Link
-                        href="/staff"
+                        href="/Staff"
                         className="px-6 py-4 rounded-xl bg-white border text-black"
                     >
                         I am staff
